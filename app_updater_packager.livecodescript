@@ -8,16 +8,14 @@ In a packaged application `appCheckForUpdates` will use the `auto update url` pr
 command finalizePackagedAssets pBuildProfile, pPlatform, @xAppA, pAppFolder
   local tURLsA
 
-  if pPlatform is "windows" then
-    _autoUpdateURLs pBuildProfile, tURLsA
+  _autoUpdateURLs pBuildProfile, tURLsA
 
-    put tURLsA["build profile"] & "/update.txt" into xAppA["auto update url"]
-  end if
+  put tURLsA["build profile"] & "/appcast.xml" into xAppA["appcast url"]
 end finalizePackagedAssets
 
 
 /**
-Summary: Replace the [[SPARKLE_URL]] variable in the Info.plist file with the correct url.
+Summary: Replace the [[SUFeedURL]] variable in the Info.plist file with the correct url.
 
 */
 command finalizePackageForPlatform pBuildProfile, pPlatform, pAppFolder, pOutputFolder
@@ -44,7 +42,7 @@ command finalizePackageForPlatform pBuildProfile, pPlatform, pAppFolder, pOutput
       if tURLsA["build profile"] is not empty then
         put tURLsA["build profile"] & "/appcast.xml" into tURL
       end if
-      replace "[[SPARKLE_URL]]" with tURL in tData
+      replace "[[SUFeedURL]]" with tURL in tData
 
       put tData into URL("binfile:" & tFile)
       break
