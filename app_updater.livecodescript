@@ -1,6 +1,8 @@
 script "AppUpdater"
 local sUpdateIsAvailable = "false"
 local sPerformingUpdate = "false"
+local sInitialized = "false"
+local sReadyToUse = "false"
 
 
 /**
@@ -23,6 +25,8 @@ command appupdaterInitialize
     get winSparkleSetFeedUrl( levureAppGet("appcast url") )
   end if
 
+  put true into sInitialized
+
   return empty
 end appupdaterInitialize
 
@@ -43,6 +47,8 @@ command appupdaterRun
   else if the platform is "win32" then
     get winSparkleInitialize()
   end if
+
+  put true into sReadyToUse
 
   return empty
 end appupdaterRun
@@ -74,6 +80,9 @@ Returns: empty
 */
 command appupdaterCheckForUpdates
   if _killUpdater() then return empty
+
+  if not sInitialized then appupdaterInitialize
+  if not sReadyToUse then appupdaterRun
 
   if the platform is "macos" then
     get sparkleCheckForUpdates()
