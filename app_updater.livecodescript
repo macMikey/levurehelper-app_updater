@@ -174,7 +174,8 @@ winSparkle doesn't send an error parameter.
 */
 on sparkleDidAbortWithError pError
   if pError["description"] is not empty then
-    answer error "Error running updater:" && pError["description"] & "."
+    if the last char of pError["description"] is not "." then put "." after pError["description"]
+    answer error pError["description"] & cr & cr & "(" & pError["failure reason"] & ")"
   end if
   pass sparkleDidAbortWithError
 end sparkleDidAbortWithError
