@@ -43,7 +43,7 @@ command appupdaterRun
   if _killUpdater() then return empty
 
   if the platform is "macos" then
-    get sparkleResetUpdateCycle()
+    -- get sparkleResetUpdateCycle()
   else if the platform is "win32" then
     get winSparkleInitialize()
   end if
