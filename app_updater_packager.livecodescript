@@ -51,11 +51,19 @@ end finalizePackageForPlatform
 
 
 /**
-Summary: Nothing to do
+Summary: Create folder where release_notes.html file goes
+
+Description:
+Create a folder that has the right name for uploading. Don't make the
+developer guess.
 
 */
 command packagingComplete pBuildProfile, pOutputFolder
+  local tUpdaterFolder
 
+  put pOutputFolder & "/update/" & _versionStringForFilenames() into tUpdaterFolder
+  dispatch "packagerCreateAllFoldersInPath" to stack "Levure Framework Application Packager" \
+        with tUpdaterFolder, pOutputFolder
 end packagingComplete
 
 
