@@ -54,7 +54,7 @@ You need to change the `APP-NAME` string to be the name of your app executable. 
 
 There are a couple of configuration options that need to be added to your `app.yml` file. 
 
-In the `build profiles` > `all profiles` > `copy files` section add an `app updater` key that points to the `appcast.xml` and `update.txt` files for your app.
+In the `build profiles` > `all profiles` > `copy files` section add an `app updater` key that points to the `appcast.xml` and `update.txt` files for your app. You will also add a `build profiles` entry for `installer name` that tells the auto updater the name of the installers to download.
 
 An `app updater` key is also added at the root level. Here you will specify the root url where the appcast.xml and releast-notes.html files will be located. You can also specify command line arguments to pass to the Windows installer. The example shows the arguments you would pass to an installer created with Inno Setup.
 
@@ -64,12 +64,19 @@ build profiles:
     copy files:
       app updater:
         - filename: ../build files/appcast.xml
+    installer name:
+      all platforms: My App
+  beta:
+    installer name:
+      all platforms: My App Beta
 
 app updater:
   all profiles:
     root auto update url: https://www.MY-SERVER.com/download/MY-APP/MY-APP-VERSION/auto_update
     windows installer arguments: /SILENT /SP-
 ```
+
+Note that in addition to the `all platforms` key you can also use `macos` and `windows` keys.
 
 ## Updating Info.plist on macOS
 
