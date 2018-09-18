@@ -8,6 +8,10 @@ local sReadyToUse = "false"
 /**
 Summary: Call before setting any updater properties.
 
+Parameters:
+
+pCheckForUpdateInBackground: Pass in true to automatically check for updates in the background.
+
 Description:
 This handler will perform any initialization required for the updater library being used
 and will assign any default properties configured in `app.yml`. After calling this handler
@@ -15,13 +19,16 @@ you can safely set properties before calling `appupdaterRun`.
 
 Returns: empty
 */
-command appupdaterInitialize
+command appupdaterInitialize pCheckForUpdateInBackground
   if _killUpdater() then return empty
 
   if the platform is "macos" then
+    # Best to store sparkle url in Info.plist. Otherwise the url persists in
+    # plist file and affects all builds of an app.
     get sparkleInitialize()
-    get sparkleSetFeedUrl( levureAppGet("appcast url") )
+    get sparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
   else if the platform is "win32" then
+    get winSparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
     get winSparkleSetFeedUrl( levureAppGet("appcast url") )
   end if
 
