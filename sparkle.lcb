@@ -392,7 +392,7 @@ library community.livecode.trevordevore.sparkle
 
 
   /**
-  Summary: Returns an arrya containing info about the Host bundle (your app).
+  Summary: Returns an array containing info about the Host bundle (your app).
 
   Description:
   Returns an array with `url`, `path`, and `identifier` keys.
