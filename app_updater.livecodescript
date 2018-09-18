@@ -95,6 +95,32 @@ end appupdaterCheckForUpdates
 
 
 /**
+Summary: Checks for updates in the background with no UI feedback.
+
+Description:
+
+If you initialize the app updater with automatic update checking then you
+don't need to use this handler.
+
+Returns: empty
+*/
+command appupdaterCheckForUpdatesInBackground
+  if _killUpdater() then return empty
+
+  if not sInitialized then appupdaterInitialize
+  if not sReadyToUse then appupdaterRun
+
+  if the platform is "macos" then
+    get sparkleCheckForUpdatesInBackground()
+  else if the platform is "win32" then
+    get winSparkleCheckForUpdatesInBackground()
+  end if
+
+  return empty
+end appupdaterCheckForUpdatesInBackground
+
+
+/**
 Summary: Return whether or not an update is being applied.
 
 Description:
