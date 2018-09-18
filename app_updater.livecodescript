@@ -28,14 +28,39 @@ command appupdaterInitialize pCheckForUpdateInBackground
     get sparkleInitialize()
     get sparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
   else if the platform is "win32" then
+    local tPath
+
     get winSparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
     get winSparkleSetFeedUrl( levureAppGet("appcast url") )
+
+    put _windowsRegistryPath() into tPath
+    if tPath is not empty then
+      get winSparkleSetRegistryPath(tPath)
+    end if
   end if
 
   put true into sInitialized
 
   return empty
 end appupdaterInitialize
+
+
+private function _windowsRegistryPath
+  local tPath
+
+  if levureAppHasProperty("app updater") then
+    local tSettingsA
+
+    put levureAppGet("app updater") into tSettingsA
+
+    put tSettingsA[levureBuildProfile()]["windows registry path"] into tPath
+    if tPath is empty then
+      put tSettingsA["all profiles"]["windows registry path"] into tPath
+    end if
+  end if
+
+  return tPath
+end _windowsRegistryPath
 
 
 /**
