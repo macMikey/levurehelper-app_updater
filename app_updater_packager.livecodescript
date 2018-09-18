@@ -36,13 +36,7 @@ command finalizePackageForPlatform pBuildProfile, pPlatform, pAppFolder, pOutput
       replace space with "_" in tBuildProfile
 
       ## sparkle URL
-      local tUpdateVarsA
-
-      _autoUpdateVariables pBuildProfile, tUpdateVarsA
-      if tUpdateVarsA["build profile"] is not empty then
-        put tUpdateVarsA["build profile"] & "/appcast.xml" into tURL
-      end if
-      replace "[[SUFeedURL]]" with tURL in tData
+      replace "[[SUFeedURL]]" with levureAppGet("appcast url") in tData
 
       put tData into URL("binfile:" & tFile)
       break
