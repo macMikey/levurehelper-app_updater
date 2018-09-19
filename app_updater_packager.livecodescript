@@ -18,7 +18,7 @@ end finalizePackagedAssets
 Summary: Replace the [[SUFeedURL]] variable in the Info.plist file with the correct url.
 
 */
-command finalizePackageForPlatform pBuildProfile, pPlatform, pAppFolder, pOutputFolder
+command finalizePackageForPlatform pBuildProfile, pPlatform, pAppA, pAppFolder, pOutputFolder
   local tFile, tData, tBuildProfile, tURL
 
   switch pPlatform
@@ -36,7 +36,7 @@ command finalizePackageForPlatform pBuildProfile, pPlatform, pAppFolder, pOutput
       replace space with "_" in tBuildProfile
 
       ## sparkle URL
-      replace "[[SUFeedURL]]" with levureAppGet("appcast url") in tData
+      replace "[[SUFeedURL]]" with pAppA["appcast url"] in tData
 
       put tData into URL("binfile:" & tFile)
       break
