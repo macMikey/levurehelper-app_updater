@@ -271,12 +271,10 @@ on sparklePreRelaunchForUpdate
   put true into sPerformingUpdate
 
   dispatch "PreUpdateApplication" to stack levureAppStackName()
-  if it is "handled" and the result is not false then
-    levureShutdownApplication
+  if it is not "handled" or (it is "handled" and the result is not false) then
+    # Continue with relaunch and install after this handler has finished.
+    send "__relaunchSparkle" to me in 0 seconds
   end if
-
-  # Continue with relaunch and install after this handler has finished.
-  send "__relaunchSparkle" to me in 0 seconds
 end sparklePreRelaunchForUpdate
 
 
