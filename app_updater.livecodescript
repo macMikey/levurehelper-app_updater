@@ -166,7 +166,7 @@ function appupdaterAutomaticallyCheckForUpdates
   if the platform is "macos" then
     return sparkleAutomaticallyChecksForUpdates()
   else if the platform is "win32" then
-    return _windowsAutoUpdateSetting()
+    return _windowsCheckForUpdatesSetting()
   else
     return false
   end if
@@ -194,6 +194,16 @@ command appupdaterSetAutomaticallyCheckForUpdates pBoolean
 
   return empty
 end appupdaterSetAutomaticallyCheckForUpdates
+
+
+/**
+Summary: Return the full registry path used to store auto updater settings on Windows.
+
+Returns: String
+*/
+function appupdaterWindowsRegistryPath
+  return _fullWindowsRegistryPath("user")
+end appupdaterWindowsRegistryPath
 
 
 private function _windowsRegistryPath
@@ -234,7 +244,7 @@ private function _fullWindowsRegistryPath pType
 end _fullWindowsRegistryPath
 
 
-private function _windowsAutoUpdateSetting
+private function _windowsCheckForUpdatesSetting
   local tPath, tBoolean
 
   put _fullWindowsRegistryPath("user") into tPath
@@ -253,7 +263,7 @@ private function _windowsAutoUpdateSetting
   end if
 
   return tBoolean
-end _windowsAutoUpdateSetting
+end _windowsCheckForUpdatesSetting
 
 
 /**
