@@ -8,10 +8,6 @@ local sReadyToUse = "false"
 /**
 Summary: Call before setting any updater properties.
 
-Parameters:
-
-pCheckForUpdateInBackground: Pass in true to automatically check for updates in the background.
-
 Description:
 This handler will perform any initialization required for the updater library being used
 and will assign any default properties configured in `app.yml`. After calling this handler
@@ -19,18 +15,16 @@ you can safely set properties before calling `appupdaterRun`.
 
 Returns: empty
 */
-command appupdaterInitialize pCheckForUpdateInBackground
+command appupdaterInitialize
   if _killUpdater() then return empty
 
   if the platform is "macos" then
     # Best to store sparkle url in Info.plist. Otherwise the url persists in
     # plist file and affects all builds of an app.
     get sparkleInitialize()
-    get sparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
   else if the platform is "win32" then
     local tPath
 
-    get winSparkleSetAutomaticallyChecksForUpdates(pCheckForUpdateInBackground is true)
     get winSparkleSetFeedUrl( levureAppGet("appcast url") )
 
     put _windowsRegistryPath() into tPath
@@ -43,24 +37,6 @@ command appupdaterInitialize pCheckForUpdateInBackground
 
   return empty
 end appupdaterInitialize
-
-
-private function _windowsRegistryPath
-  local tPath
-
-  if levureAppHasProperty("app updater") then
-    local tSettingsA
-
-    put levureAppGet("app updater") into tSettingsA
-
-    put tSettingsA[levureBuildProfile()]["windows registry path"] into tPath
-    if tPath is empty then
-      put tSettingsA["all profiles"]["windows registry path"] into tPath
-    end if
-  end if
-
-  return tPath
-end _windowsRegistryPath
 
 
 /**
@@ -174,6 +150,109 @@ Returns: Boolean
 function appupdaterIsUpdateAvailable
   return sUpdateIsAvailable
 end appupdaterIsUpdateAvailable
+
+
+/**
+Summary: Returns setting for automatic check for updates.
+
+Description:
+On Windows the HKEY_CURRENT_USER root is checked first and then the HKEY_LOCAL_MACHINE
+root is checked. If an administrator has set the HKEY_LOCAL_MACHINE root then that
+overrides the user settings.
+
+Returns: Boolean
+*/
+function appupdaterAutomaticallyCheckForUpdates
+  if the platform is "macos" then
+    return sparkleAutomaticallyChecksForUpdates()
+  else if the platform is "win32" then
+    return _windowsAutoUpdateSetting()
+  else
+    return false
+  end if
+end appupdaterAutomaticallyCheckForUpdates
+
+
+/**
+Summary: Sets whether or not updater should automatically check for updates.
+
+Parameters:
+
+pBoolean: Pass in true to automatically check for updates in the background.
+
+Description:
+On Windows this will set the value for the HKEY_CURRENT_USER root.
+
+Returns: nothing
+*/
+command appupdaterSetAutomaticallyCheckForUpdates pBoolean
+  if the platform is "macos" then
+    get sparkleSetAutomaticallyChecksForUpdates(pBoolean is true)
+  else if the platform is "win32" then
+    get winSparkleSetAutomaticallyChecksForUpdates(pBoolean is true)
+  end if
+
+  return empty
+end appupdaterSetAutomaticallyCheckForUpdates
+
+
+private function _windowsRegistryPath
+  local tPath
+
+  if levureAppHasProperty("app updater") then
+    local tSettingsA
+
+    put levureAppGet("app updater") into tSettingsA
+
+    put tSettingsA[levureBuildProfile()]["windows registry path"] into tPath
+    if tPath is empty then
+      put tSettingsA["all profiles"]["windows registry path"] into tPath
+    end if
+
+    if char 1 of tPath is "\" then delete char 1 of tPath
+  end if
+
+  return tPath
+end _windowsRegistryPath
+
+
+private function _fullWindowsRegistryPath pType
+  local tPath
+
+  put _windowsRegistryPath() into tPath
+
+  if tPath is not empty then
+    if pType is "local machine" then
+      put "HKEY_LOCAL_MACHINE\" before tPath
+    else
+      put "HKEY_CURRENT_USER\" before tPath
+    end if
+  end if
+
+  return tPath
+end _fullWindowsRegistryPath
+
+
+private function _windowsAutoUpdateSetting
+  local tPath, tBoolean
+
+  put _fullWindowsRegistryPath("user") into tPath
+
+  if tPath is not empty then
+    local tMachineSetting
+
+    put queryRegistry(tPath) is 1 into tBoolean
+
+    put _fullWindowsRegistryPath("local machine") into tPath
+    put queryRegistry(tPath) into tMachineSetting
+
+    if tMachineSetting is not empty then
+      put tMachineSetting is 1 into tBoolean
+    end if
+  end if
+
+  return tBoolean
+end _windowsAutoUpdateSetting
 
 
 /**
