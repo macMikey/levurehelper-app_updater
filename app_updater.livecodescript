@@ -210,6 +210,7 @@ private function _windowsRegistryPath
     end if
 
     if char 1 of tPath is "\" then delete char 1 of tPath
+    if the last char of tPath is "\" then delete the last char of tPath
   end if
 
   return tPath
@@ -241,10 +242,10 @@ private function _windowsAutoUpdateSetting
   if tPath is not empty then
     local tMachineSetting
 
-    put queryRegistry(tPath) is 1 into tBoolean
+    put queryRegistry(tPath & "\CheckForUpdates") is 1 into tBoolean
 
     put _fullWindowsRegistryPath("local machine") into tPath
-    put queryRegistry(tPath) into tMachineSetting
+    put queryRegistry(tPath & "\CheckForUpdates") into tMachineSetting
 
     if tMachineSetting is not empty then
       put tMachineSetting is 1 into tBoolean
