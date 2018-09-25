@@ -12,7 +12,7 @@ The Windows implementation uses an extension that wraps the [WinSparkle](https:/
 
 ### appcast.xml
 
-Sparkle and WinSparkel both use an `appcast.xml` file to detect updates. You need to copy the file included with this helper into the folder where supporting build files are stored (e.g. `build files`) and customize it. Here are the default contents:
+Sparkle and WinSparkle both use an `appcast.xml` file to detect updates. You need to copy the file included with this helper into the folder where supporting build files are stored (e.g. `build files`) and customize it. Here are the default contents:
 
 ```
 <?xml version="1.0" encoding="utf-8"?>
@@ -56,7 +56,11 @@ There are a couple of configuration options that need to be added to your `app.y
 
 In the `build profiles` > `all profiles` > `copy files` section add an `app updater` key that points to the `appcast.xml` and `update.txt` files for your app. You will also add a `build profiles` entry for `installer name` that tells the auto updater the name of the installers to download.
 
-An `app updater` key is also added at the root level. Here you will specify the root url where the appcast.xml and releast-notes.html files will be located. You can also specify command line arguments to pass to the Windows installer. The example shows the arguments you would pass to an installer created with Inno Setup.
+An `app updater` key is also added at the root level. Here you will specify the follwoing:
+
+1. The root url where the appcast.xml and releast-notes.html files will be located. 
+2. Command line arguments to pass to the Windows installer. The example shows the arguments you would pass to an installer created with Inno Setup.
+3. The registry path where WinSparkle settings will be stored. Do not include the root (e.g. `HKEY_LOCAL_MACHINE\`).
 
 ```
 build profiles:
@@ -74,27 +78,42 @@ app updater:
   all profiles:
     root auto update url: https://www.MY-SERVER.com/download/MY-APP/MY-APP-VERSION/auto_update
     windows installer arguments: /SILENT /SP-
+    windows registry path: Software\COMPANY_NAME\PRODUCT_NAME\WinSparkle
 ```
 
 Note that in addition to the `all platforms` key you can also use `macos` and `windows` keys.
 
 ## Updating Info.plist on macOS
 
-On macOS you will need to customize the Info.plist file and add the following key/value to the &lt;dict&gt; node:
+On macOS you will need to customize the Info.plist file and add the following key/value pairs to the &lt;dict&gt; node:
 
 ```
 <key>SUFeedURL</key>
 <string>[[SUFeedURL]]</string>
+<key>SUEnableAutomaticChecks</key>
+<true/>
 ```
 
 During the packaging process Levure will replace `[[SUFeedURL]]` with the appcast.xml url.
 
+## Implementing within Levure
+
+You will need to add some calls to the app updater library in a couple of the messages that Levure dispatches.
+
+1. Within the `InitializeApplication` message call `appupdaterInitialize`.
+2. At the end of the `OpenApplication` message call `appupdaterRun`. This should be called after you have displayed your application window.
+3. In the `PreShutdownApplication` message call `appupdaterCleanup`.
+4. If you have a menu item that is used to check for updates then call `appupdaterCheckForUpdates` from when the menu item is selected.
+
+The auto update helper also adds the `PreUpdateApplication` message that is dispatched to your application right before the application is updated. On macOS you can return return `false` from `PreUpdateApplication` if you would like to cancel the update.
+
 ## Packaging your application
 
-When you package an application an `update` folder will be added to the output folder (sits alongside a `macos` or `windows` folder). The `update` folder will contain the appcast.xml file.
+When you package an application an `update` folder will be added to the output folder (sits alongside a `macos` or `windows` folder). The `update` folder will contain the appcast.xml file and a folder named after the app version number where your release notes can go.
 
 ```
 ./update/appcast.xml
+./update/1.0.0-15
 ```
 
 ## Uploading your updates
@@ -107,8 +126,8 @@ On your server the `auto_update` folder should have a `release` folder inside of
 
 1. Upload your installers.
 2. Upload the `1.0.0-10` folder to the `./auto_update/release` folder.
-3. Upload your `release_notes.html` file to the `./auto_update/release` folder.
-4. Upload the `appcast.xml` file to the `./auto_update` folder.
+3. Upload your `release_notes.html` file to the `./auto_update/release/1.0.0-10` folder.
+4. Upload the `appcast.xml` file to the `./auto_update/release` folder.
 
 You should now have urls similar to the following:
 
